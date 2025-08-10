@@ -1,5 +1,5 @@
 name: syncinventory
-version: 'v1.0.0'
+version: '1.0.0'
 main: cn.kurt6.syncinventory.SyncInventory
 api-version: 1.16
 authors: [ Kurt ]

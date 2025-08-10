@@ -1,6 +1,6 @@
-# 插件配置
 settings:
-  # 自动保存间隔(分钟)
+  # 持久化数据自动保存间隔(分钟)
+  # #Persistent data auto save interval (minutes)
   auto-save-interval: 5
-  # 默认语言 (en/zh)
+  # en / zh
   language: zh
