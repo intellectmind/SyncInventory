@@ -3,6 +3,7 @@
 **其他语言版本: [English](README.md)，[中文](README_zh.md)。**
 
 该插件实现了玩家背包物品实时同步，支持在同一个自定义群组的玩家共享背包内容。
+
 支持Folia, Paper, Bukkit, Purpur, Spigot等多个核心
 
 ## 📌 功能介绍
