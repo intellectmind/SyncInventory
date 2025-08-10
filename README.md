@@ -51,3 +51,6 @@ settings:
 ```
 
 ---
+
+### bStats
+![bStats](https://bstats.org/signatures/bukkit/SyncInventory.svg)
