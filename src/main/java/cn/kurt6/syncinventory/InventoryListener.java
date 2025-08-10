@@ -211,9 +211,8 @@ public class InventoryListener implements Listener {
             // 使用原子标记确保只有第一个死亡玩家会掉落物品
             if (plugin.deathMarkers.add(groupName)) {
                 // 延迟1tick确保其他死亡处理完成
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
+                if (plugin.isFolia()) {
+                    player.getScheduler().runDelayed(plugin, task -> {
                         try {
                             List<ItemStack> drops = event.getDrops();
                             drops.clear(); // 清空原有掉落
@@ -221,8 +220,21 @@ public class InventoryListener implements Listener {
                         } finally {
                             plugin.deathMarkers.remove(groupName); // 清理标记
                         }
-                    }
-                }.runTaskLater(plugin, 1L);
+                    }, null, 1L);
+                } else {
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                List<ItemStack> drops = event.getDrops();
+                                drops.clear(); // 清空原有掉落
+                                drops.addAll(Arrays.asList(groupContents)); // 添加共享背包物品
+                            } finally {
+                                plugin.deathMarkers.remove(groupName); // 清理标记
+                            }
+                        }
+                    }.runTaskLater(plugin, 1L);
+                }
             } else {
                 // 后续死亡的玩家不掉落共享背包物品
                 event.getDrops().clear();
