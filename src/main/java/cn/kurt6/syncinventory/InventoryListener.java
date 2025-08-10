@@ -43,7 +43,7 @@ public class InventoryListener implements Listener {
                 if (player.isOnline() && plugin.isInGroup(player)) {
                     plugin.syncInventoryToGroup(player, plugin.getPlayerGroup(player));
                 }
-            }, null, 20L); // 延迟1秒
+            }, null, 5L);
         } else {
             new BukkitRunnable() {
                 @Override
@@ -52,7 +52,7 @@ public class InventoryListener implements Listener {
                         plugin.syncInventoryToGroup(player, plugin.getPlayerGroup(player));
                     }
                 }
-            }.runTaskLater(plugin, 20L);
+            }.runTaskLater(plugin, 5L);
         }
     }
 
@@ -129,7 +129,7 @@ public class InventoryListener implements Listener {
                         plugin.syncInventoryToGroup(player, plugin.getPlayerGroup(player));
                     }
                 }
-            }.runTaskLater(plugin, 1L);
+            }.runTaskLater(plugin, 0L);
         }
     }
 
@@ -179,12 +179,26 @@ public class InventoryListener implements Listener {
     private void scheduleSync(Player player) {
         UUID playerId = player.getUniqueId();
 
-        // 防止重复调度
         if (syncingPlayers.contains(playerId)) {
             return;
         }
 
         syncingPlayers.add(playerId);
+
+        long delay = 0L; // 默认立即执行
+
+        // 对于特定事件保持1 tick延迟
+        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+        for (StackTraceElement element : stackTrace) {
+            String methodName = element.getMethodName();
+            if (methodName.equals("onInventoryClick") ||
+                    methodName.equals("onPlayerDropItem") ||
+                    methodName.equals("onPlayerPickupItem") ||
+                    methodName.equals("onPlayerRespawn")) {
+                delay = 1L;
+                break;
+            }
+        }
 
         if (plugin.isFolia()) {
             player.getScheduler().runDelayed(plugin, task -> {
@@ -192,7 +206,7 @@ public class InventoryListener implements Listener {
                 if (player.isOnline() && plugin.isInGroup(player)) {
                     plugin.syncInventoryFromPlayer(player);
                 }
-            }, null, 1L); // 延迟tick
+            }, null, delay);
         } else {
             new BukkitRunnable() {
                 @Override
@@ -202,7 +216,7 @@ public class InventoryListener implements Listener {
                         plugin.syncInventoryFromPlayer(player);
                     }
                 }
-            }.runTaskLater(plugin, 1L);
+            }.runTaskLater(plugin, delay);
         }
     }
 }

@@ -67,3 +67,4 @@ invalid-group-name: "§cGroup name can only contain letters, numbers and undersc
 join-confirm-message: "§eYou are about to join group %group%, your current inventory will be backed up."
 join-confirm-timeout: "§aType /syncinv confirm to confirm joining, or wait 10 seconds to cancel automatically."
 help-console: "§aConsole commands: reload, language"
+player-in-group: "§cPlayer %player% is already in group %group%"

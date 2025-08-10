@@ -601,7 +601,9 @@ public class SyncInventory extends JavaPlugin {
 
         // 检查组是否存在
         if (!groupInventories.containsKey(groupName)) {
-            sender.sendMessage(getMessage("group-not-exists").replace("%group%", groupName));
+            sender.sendMessage(getMessage("player-in-group")
+                    .replace("%player%", targetPlayer.getName())
+                    .replace("%group%", groupName));
             return true;
         }
 
@@ -609,7 +611,7 @@ public class SyncInventory extends JavaPlugin {
         if (playerGroups.containsKey(targetPlayer.getUniqueId())) {
             String currentGroup = playerGroups.get(targetPlayer.getUniqueId());
             if (currentGroup.equals(groupName)) {
-                sender.sendMessage("§cPlayer is already in group " + groupName);
+                sender.sendMessage(getMessage("player-in-group").replace("%group%", groupName));
                 return true;
             }
             // 自动退出当前组
