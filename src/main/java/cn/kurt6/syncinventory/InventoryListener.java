@@ -5,19 +5,19 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.inventory.InventoryOpenEvent;
-import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerPickupItemEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.enchantment.EnchantItemEvent;
+import org.bukkit.event.enchantment.PrepareItemEnchantEvent;
+import org.bukkit.event.inventory.*;
+import org.bukkit.event.player.*;
+import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.entity.Projectile;
+import org.bukkit.entity.Arrow;
 
 import java.util.*;
 
@@ -232,6 +232,209 @@ public class InventoryListener implements Listener {
         plugin.markDataModified();
     }
 
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onItemDamage(PlayerItemDamageEvent event) {
+        Player player = event.getPlayer();
+        if (plugin.isInGroup(player)) {
+            // 立即同步，不延迟
+            plugin.syncInventoryFromPlayer(player);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onProjectileLaunch(ProjectileLaunchEvent event) {
+        Projectile projectile = event.getEntity();
+        if (projectile instanceof Arrow && projectile.getShooter() instanceof Player) {
+            Player player = (Player) projectile.getShooter();
+            if (plugin.isInGroup(player)) {
+                // 立即同步，不延迟
+                plugin.syncInventoryFromPlayer(player);
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBlockPlace(BlockPlaceEvent event) {
+        Player player = event.getPlayer();
+        if (plugin.isInGroup(player)) {
+            // 立即同步，不延迟
+            plugin.syncInventoryFromPlayer(player);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onItemConsume(PlayerItemConsumeEvent event) {
+        Player player = event.getPlayer();
+        if (plugin.isInGroup(player)) {
+            // 立即同步
+            plugin.syncInventoryFromPlayer(player);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onInventoryInteract(InventoryInteractEvent event) {
+        if (event.getWhoClicked() instanceof Player) {
+            Player player = (Player) event.getWhoClicked();
+            if (plugin.isInGroup(player)) {
+                scheduleSync(player);
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onTradeSelect(TradeSelectEvent event) {
+        if (event.getWhoClicked() instanceof Player) {
+            Player player = (Player) event.getWhoClicked();
+            if (plugin.isInGroup(player)) {
+                scheduleSync(player);
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onCraftItem(CraftItemEvent event) {
+        if (event.getWhoClicked() instanceof Player) {
+            Player player = (Player) event.getWhoClicked();
+            if (plugin.isInGroup(player)) {
+                scheduleSync(player);
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPrepareAnvil(PrepareAnvilEvent event) {
+        if (event.getView().getPlayer() instanceof Player) {
+            Player player = (Player) event.getView().getPlayer();
+            if (plugin.isInGroup(player)) {
+                scheduleSync(player);
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBucketUse(PlayerBucketEmptyEvent event) {
+        Player player = event.getPlayer();
+        if (plugin.isInGroup(player)) {
+            scheduleSync(player);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBucketFill(PlayerBucketFillEvent event) {
+        Player player = event.getPlayer();
+        if (plugin.isInGroup(player)) {
+            scheduleSync(player);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onInventoryDrag(InventoryDragEvent event) {
+        if (event.getWhoClicked() instanceof Player) {
+            Player player = (Player) event.getWhoClicked();
+            if (plugin.isInGroup(player)) {
+                scheduleSync(player);
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onCreativeInventory(InventoryCreativeEvent event) {
+        if (event.getWhoClicked() instanceof Player) {
+            Player player = (Player) event.getWhoClicked();
+            if (plugin.isInGroup(player)) {
+                scheduleSync(player);
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPlayerInteract(PlayerInteractEvent event) {
+        Player player = event.getPlayer();
+        if (plugin.isInGroup(player) && event.getItem() != null) {
+            scheduleSync(player);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
+        Player player = event.getPlayer();
+        if (plugin.isInGroup(player) && player.getInventory().getItemInMainHand() != null) {
+            scheduleSync(player);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onEnchantItem(EnchantItemEvent event) {
+        Player player = event.getEnchanter();
+        if (plugin.isInGroup(player)) {
+            scheduleSync(player);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onFurnaceExtract(FurnaceExtractEvent event) {
+        Player player = event.getPlayer();
+        if (plugin.isInGroup(player)) {
+            scheduleSync(player);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPrepareEnchant(PrepareItemEnchantEvent event) {
+        Player player = event.getEnchanter();
+        if (plugin.isInGroup(player)) {
+            scheduleSync(player);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPrepareCraft(PrepareItemCraftEvent event) {
+        if (event.getView().getPlayer() instanceof Player) {
+            Player player = (Player) event.getView().getPlayer();
+            if (plugin.isInGroup(player)) {
+                scheduleSync(player);
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onExpChange(PlayerExpChangeEvent event) {
+        Player player = event.getPlayer();
+        if (plugin.isInGroup(player)) {
+            scheduleSync(player);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onRiptide(PlayerRiptideEvent event) {
+        Player player = event.getPlayer();
+        if (plugin.isInGroup(player)) {
+            scheduleSync(player);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPlayerFish(PlayerFishEvent event) {
+        if (event.getState() == PlayerFishEvent.State.CAUGHT_FISH) {
+            Player player = event.getPlayer();
+            if (plugin.isInGroup(player)) {
+                scheduleSync(player);
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onAnvilUse(InventoryClickEvent event) {
+        if (event.getInventory() instanceof AnvilInventory &&
+                event.getWhoClicked() instanceof Player) {
+            Player player = (Player) event.getWhoClicked();
+            if (plugin.isInGroup(player) &&
+                    event.getSlotType() == InventoryType.SlotType.RESULT) {
+                scheduleSync(player);
+            }
+        }
+    }
+
     /**
      * 调度延迟同步任务
      */
@@ -246,7 +449,7 @@ public class InventoryListener implements Listener {
 
         long delay = 0L; // 默认立即执行
 
-        // 对于特定事件保持1 tick延迟
+        // 对于特定事件为1 tick延迟
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
         for (StackTraceElement element : stackTrace) {
             String methodName = element.getMethodName();
@@ -254,13 +457,6 @@ public class InventoryListener implements Listener {
                 delay = 1L;
                 break;
             }
-//            if (methodName.equals("onInventoryClick") ||
-//                    methodName.equals("onPlayerDropItem") ||
-//                    methodName.equals("onPlayerPickupItem") ||
-//                    methodName.equals("onPlayerRespawn")) {
-//                delay = 1L;
-//                break;
-//            }
         }
 
         if (plugin.isFolia()) {

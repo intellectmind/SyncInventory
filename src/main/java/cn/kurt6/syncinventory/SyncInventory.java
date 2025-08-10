@@ -46,6 +46,10 @@ public class SyncInventory extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        // bStats
+        int pluginId = 26859;
+        cn.kurt6.back.bStats.Metrics metrics = new cn.kurt6.back.bStats.Metrics(this, pluginId);
+
         try {
             initializePlugin();
             this.getCommand("syncinv").setExecutor(this);
