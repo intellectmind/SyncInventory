@@ -1,5 +1,7 @@
 # 📦 SyncInventory 背包同步插件
 
+**其他语言版本: [English](README.md)，[中文](README_zh.md)。**
+
 ## 📌 功能介绍
 
 - **多玩家共享**  
@@ -43,7 +45,6 @@
 ```yaml
 settings:
   # 持久化数据自动保存间隔(分钟)
-  # Persistent data auto save interval (minutes)
   auto-save-interval: 5
 
   # 插件语言 (en / zh)
