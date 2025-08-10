@@ -2,6 +2,10 @@
 
 **Read this in other languages: [English](README.md)，[中文](README_zh.md)。**
 
+This plugin enables real-time synchronization of player inventory items, supporting shared inventory contents among players within the same custom group.
+
+Compatible with Folia, Paper, Bukkit, Purpur, Spigot, and other server cores.
+
 ## 📌 Features  
 
 - **Multi-player Inventory Sync**  
