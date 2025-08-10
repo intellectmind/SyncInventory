@@ -53,7 +53,7 @@ settings:
   # Persistent data auto save interval (minutes)
   auto-save-interval: 5
   
-  # Interface language (en/zh)
+  # en / zh
   language: en
 ```
 
