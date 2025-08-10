@@ -1,0 +1,6 @@
+# 插件配置
+settings:
+  # 自动保存间隔(分钟)
+  auto-save-interval: 5
+  # 默认语言 (en/zh)
+  language: zh

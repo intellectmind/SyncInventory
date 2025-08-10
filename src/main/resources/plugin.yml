@@ -1,0 +1,27 @@
+name: syncinventory
+version: 'v1.0.0'
+main: cn.kurt6.syncinventory.SyncInventory
+api-version: 1.16
+authors: [ Kurt ]
+folia-supported: true
+commands:
+  syncinv:
+    description: Main command for SyncInventory plugin
+    usage: /syncinv <create|delete|join|leave|list|members|reload|language|help|confirm>
+    permission: syncinv.use
+permissions:
+  syncinv.use:
+    description: Allows using basic commands
+    default: true
+  syncinv.join:
+    description: Allows joining groups
+    default: op
+  syncinv.leave:
+    description: Allows leaving groups
+    default: op
+  syncinv.manage:
+    description: Allows managing groups
+    default: op
+  syncinv.admin:
+    description: Allows all admin functions
+    default: op
