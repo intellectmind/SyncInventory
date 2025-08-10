@@ -460,12 +460,13 @@ public class InventoryListener implements Listener {
         }
 
         if (plugin.isFolia()) {
+            // 确保Folia上至少1 tick延迟
             player.getScheduler().runDelayed(plugin, task -> {
                 syncingPlayers.remove(playerId);
                 if (player.isOnline() && plugin.isInGroup(player)) {
                     plugin.syncInventoryFromPlayer(player);
                 }
-            }, null, delay);
+            }, null, Math.max(1L, delay)); // 确保最小延迟为1
         } else {
             new BukkitRunnable() {
                 @Override

@@ -59,6 +59,10 @@ public class SyncInventory extends JavaPlugin {
             e.printStackTrace();
             getServer().getPluginManager().disablePlugin(this);
         }
+
+        if (isFolia()) {
+            getLogger().info("Folia");
+        }
     }
 
     private void initializePlugin() throws Exception {
@@ -103,7 +107,7 @@ public class SyncInventory extends JavaPlugin {
             scheduledTask = getServer().getGlobalRegionScheduler()
                     .runAtFixedRate(this, task -> {
                         if (dataModified) {
-                            saveData();
+                            getServer().getGlobalRegionScheduler().execute(this, this::saveData);
                             dataModified = false;
                         }
                     }, interval, interval);
@@ -872,9 +876,11 @@ public class SyncInventory extends JavaPlugin {
                 // 延迟1tick执行，避免在事件处理过程中修改背包
                 if (isFolia()) {
                     member.getScheduler().run(this, task -> {
-                        if (groupName.equals(playerGroups.get(memberId))) {
-                            member.getInventory().setContents(playerContents);
-                            member.updateInventory();
+                        synchronized (syncLock) {
+                            if (groupName.equals(playerGroups.get(memberId))) {
+                                member.getInventory().setContents(playerContents);
+                                member.updateInventory();
+                            }
                         }
                     }, null);
                 } else {
