@@ -50,7 +50,7 @@ All commands use `/syncinv` prefix
 
 ```yaml
 settings:
-  # Auto-save interval in minutes
+  # Persistent data auto save interval (minutes)
   auto-save-interval: 5
   
   # Interface language (en/zh)
