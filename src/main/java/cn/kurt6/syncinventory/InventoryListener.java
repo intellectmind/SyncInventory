@@ -1,5 +1,6 @@
 package cn.kurt6.syncinventory;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -13,11 +14,12 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.event.entity.PlayerDeathEvent;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class InventoryListener implements Listener {
 
@@ -173,6 +175,63 @@ public class InventoryListener implements Listener {
         }
     }
 
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPlayerDeath(PlayerDeathEvent event) {
+        Player player = event.getEntity();
+        if (!plugin.isInGroup(player)) return;
+
+        // 1. 备份当前共享背包内容
+        String groupName = plugin.getPlayerGroup(player);
+        if (groupName == null) return;
+
+        Inventory groupInv = plugin.groupInventories.get(groupName);
+        if (groupInv == null) return;
+
+        ItemStack[] groupContents = groupInv.getContents().clone();
+
+        // 2. 立即清空共享背包和所有在线成员的背包
+        synchronized (plugin.syncLock) {
+            groupInv.clear();
+
+            Set<UUID> members = plugin.groupMembers.get(groupName);
+            if (members != null) {
+                for (UUID memberId : members) {
+                    Player member = Bukkit.getPlayer(memberId);
+                    if (member != null && member.isOnline()) {
+                        member.getInventory().clear();
+                        member.updateInventory();
+                    }
+                }
+            }
+        }
+
+        // 3. 修改死亡掉落 - 只掉落一份共享背包物品
+        if (event.getDrops() != null && !event.getDrops().isEmpty()) {
+            // 如果是第一个死亡的玩家，掉落共享背包内容
+            // 使用原子标记确保只有第一个死亡玩家会掉落物品
+            if (plugin.deathMarkers.add(groupName)) {
+                // 延迟1tick确保其他死亡处理完成
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            List<ItemStack> drops = event.getDrops();
+                            drops.clear(); // 清空原有掉落
+                            drops.addAll(Arrays.asList(groupContents)); // 添加共享背包物品
+                        } finally {
+                            plugin.deathMarkers.remove(groupName); // 清理标记
+                        }
+                    }
+                }.runTaskLater(plugin, 1L);
+            } else {
+                // 后续死亡的玩家不掉落共享背包物品
+                event.getDrops().clear();
+            }
+        }
+
+        plugin.markDataModified();
+    }
+
     /**
      * 调度延迟同步任务
      */
@@ -191,13 +250,17 @@ public class InventoryListener implements Listener {
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
         for (StackTraceElement element : stackTrace) {
             String methodName = element.getMethodName();
-            if (methodName.equals("onInventoryClick") ||
-                    methodName.equals("onPlayerDropItem") ||
-                    methodName.equals("onPlayerPickupItem") ||
-                    methodName.equals("onPlayerRespawn")) {
+            if (methodName.equals("onInventoryClick")) {
                 delay = 1L;
                 break;
             }
+//            if (methodName.equals("onInventoryClick") ||
+//                    methodName.equals("onPlayerDropItem") ||
+//                    methodName.equals("onPlayerPickupItem") ||
+//                    methodName.equals("onPlayerRespawn")) {
+//                delay = 1L;
+//                break;
+//            }
         }
 
         if (plugin.isFolia()) {

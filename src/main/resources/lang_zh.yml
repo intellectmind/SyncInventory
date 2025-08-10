@@ -67,4 +67,4 @@ invalid-group-name: "§c组名只能包含字母、数字和下划线，且长�
 join-confirm-message: "§e你即将加入组 %group%，当前背包将被备份。"
 join-confirm-timeout: "§a输入 /syncinv confirm 确认加入，或等待10秒自动取消。"
 help-console: "§a控制台命令: reload, language"
-player-in-group: "§c玩家 %player% 已在组 %group% 中"
+player-in-group: "§c玩家已在组 %group% 中"

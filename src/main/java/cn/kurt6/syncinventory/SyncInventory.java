@@ -25,8 +25,9 @@ public class SyncInventory extends JavaPlugin {
 
     final Map<String, Inventory> groupInventories = new ConcurrentHashMap<>();
     private final Map<UUID, String> playerGroups = new ConcurrentHashMap<>();
-    private final Map<String, Set<UUID>> groupMembers = new ConcurrentHashMap<>();
+    final Map<String, Set<UUID>> groupMembers = new ConcurrentHashMap<>();
     private final Map<UUID, ItemStack[]> playerBackups = new ConcurrentHashMap<>();
+    final Set<String> deathMarkers = ConcurrentHashMap.newKeySet();
 
     // 待确认加入的玩家映射
     private final Map<UUID, String> pendingJoins = new ConcurrentHashMap<>();
@@ -41,7 +42,7 @@ public class SyncInventory extends JavaPlugin {
     private volatile boolean dataModified = false;
 
     // 同步锁，防止并发修改
-    private final Object syncLock = new Object();
+    final Object syncLock = new Object();
 
     @Override
     public void onEnable() {
@@ -138,6 +139,7 @@ public class SyncInventory extends JavaPlugin {
                 getLogger().log(Level.WARNING, "Error cancelling scheduled task", e);
             }
         }
+        deathMarkers.clear();
 
         // 强制保存数据
         saveData();
@@ -601,9 +603,7 @@ public class SyncInventory extends JavaPlugin {
 
         // 检查组是否存在
         if (!groupInventories.containsKey(groupName)) {
-            sender.sendMessage(getMessage("player-in-group")
-                    .replace("%player%", targetPlayer.getName())
-                    .replace("%group%", groupName));
+            sender.sendMessage(getMessage("group-not-exists").replace("%group%", groupName));
             return true;
         }
 
@@ -895,7 +895,7 @@ public class SyncInventory extends JavaPlugin {
         return playerGroups.get(player.getUniqueId());
     }
 
-    private void markDataModified() {
+    void markDataModified() {
         dataModified = true;
     }
 
