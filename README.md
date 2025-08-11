@@ -4,6 +4,8 @@
 
 This plugin enables real-time synchronization of player inventory items, supporting shared inventory contents among players within the same custom group.
 
+Independent player backpacks and shared backpacks, players can automatically restore their backpacks after leaving the synchronized group.
+
 Compatible with Folia, Paper, Bukkit, Purpur, Spigot, and other server cores.
 
 ## 📌 Features  
